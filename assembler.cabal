@@ -1,0 +1,63 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.32.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 7e3c1ed794655a123cc9545409f1fee9bf10d7d540364914672267e784c5bcf7
+
+name:           assembler
+version:        0.1.0.0
+description:    Assembler for homemade 8-bit computer
+homepage:       https://github.com/githubuser/assembler#readme
+bug-reports:    https://github.com/githubuser/assembler/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2019 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/assembler
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_assembler
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable assembler-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_assembler
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      assembler
+    , base >=4.7 && <5
+    , parsec
+  default-language: Haskell2010
+
+test-suite assembler-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_assembler
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      assembler
+    , base >=4.7 && <5
+  default-language: Haskell2010
