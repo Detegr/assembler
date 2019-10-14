@@ -8,7 +8,6 @@ copyright:           "2019 Author name here"
 
 extra-source-files:
 - README.md
-- ChangeLog.md
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -24,6 +23,9 @@ dependencies:
 
 library:
   source-dirs: src
+  dependencies:
+    - bytestring
+    - parsec
 
 executables:
   assembler-exe:
@@ -35,7 +37,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - assembler
-    - parsec
+    - bytestring
 
 tests:
   assembler-test:

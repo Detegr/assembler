@@ -1,6 +1,8 @@
 module Lib
-    ( someFunc
+    ( compile
     ) where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import qualified Data.ByteString.Lazy.Char8 as BS
+
+compile :: BS.ByteString -> BS.ByteString
+compile input = input
