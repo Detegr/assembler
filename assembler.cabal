@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4ab5386d373a5bb0adab785370016983acd29fc15ccaca871dd96b01f44406ba
+-- hash: 5ffab2c340cc04f067469e4a3c534cd39b8267c04068edfbe48ffad692ddbf42
 
 name:           assembler
 version:        0.1.0.0
@@ -34,7 +34,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
-    , parsec
+    , megaparsec
   default-language: Haskell2010
 
 executable assembler-exe

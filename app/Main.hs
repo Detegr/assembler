@@ -14,8 +14,11 @@ inputFilePath args =
     0 -> Nothing
     _ -> Just $ head args
 
-writeResultToDisk :: BS.ByteString -> IO ()
-writeResultToDisk = BS.putStrLn -- TODO
+writeResultToDisk :: Either String [Instruction] -> IO ()
+writeResultToDisk input =
+  case input of
+    Left error -> putStrLn error
+    Right output -> putStrLn . show $ output
 
 main :: IO ()
 main = do

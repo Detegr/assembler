@@ -25,7 +25,7 @@ library:
   source-dirs: src
   dependencies:
     - bytestring
-    - parsec
+    - megaparsec
 
 executables:
   assembler-exe:
