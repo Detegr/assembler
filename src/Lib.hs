@@ -2,6 +2,7 @@
 
 module Lib
     ( compile,
+      Action,
       Instruction
     ) where
 
@@ -16,6 +17,13 @@ import qualified Text.Megaparsec.Byte.Lexer as L
 -- Parser using ByteStrings and using Void as an error type
 -- TODO: Add error type?
 type Parser = Parsec Void B.ByteString
+
+-- Action type
+-- Represents either a valid instruction to execute
+-- or an action changing the control flow of the program,
+-- for example setting the address or defining labels
+data Action = Instruction Instruction | SetExecAddr Value | JumpLabel B.ByteString
+  deriving Show
 
 -- Instruction type
 -- Contains all instructions that this parser supports
@@ -119,13 +127,31 @@ instruction' = lexeme (many alphaNumChar >>= check)
 instruction :: Parser Instruction
 instruction = toInstruction <$> instruction' <*> value
 
+-- Parses an action that changes the current address
+-- For example:
+-- * = #100
+execAddress :: Parser Action
+execAddress = symbol "*" >> symbol "=" >> value >>= return . SetExecAddr
+
+-- Parses a label that can be used with jumps
+-- A label is a string of alphanumeric characters ending with ':'
+-- For example:
+-- LOOP:
+jumpLabel :: Parser Action
+jumpLabel = try $ (fmap B.pack $ manyTill alphaNumChar (symbol ":")) >>= return . JumpLabel
+
+-- Parses an action
+-- See `Action` for more details of what the parser supports
+action :: Parser Action
+action = execAddress <|> jumpLabel <|> fmap Instruction instruction
+
 -- Main parser
 -- Parses a list of instructions
-parser :: Parser [Instruction]
-parser = between spaceOrComment eof $ many instruction
+parser :: Parser [Action]
+parser = between spaceOrComment eof $ many action
 
--- Compile input into instructions
-compile :: B.ByteString -> Either String [Instruction]
+-- Compile input into actions
+compile :: B.ByteString -> Either String [Action]
 compile input =
     case parse parser "" input of
       Left bundle -> Left $ errorBundlePretty bundle

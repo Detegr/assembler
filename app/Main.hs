@@ -14,7 +14,7 @@ inputFilePath args =
     0 -> Nothing
     _ -> Just $ head args
 
-writeResultToDisk :: Either String [Instruction] -> IO ()
+writeResultToDisk :: Either String [Action] -> IO ()
 writeResultToDisk input =
   case input of
     Left error -> putStrLn error
