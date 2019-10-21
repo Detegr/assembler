@@ -1,9 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Lib
-    ( compile,
-      Action,
-      Instruction
+    ( Lib.parse,
+      Action(..),
+      Instruction(..),
+      Value(..)
     ) where
 
 import Debug.Trace
@@ -23,19 +24,25 @@ type Parser = Parsec Void B.ByteString
 -- or an action changing the control flow of the program,
 -- for example setting the address or defining labels
 data Action = Instruction Instruction | SetExecAddr Value | JumpLabel B.ByteString
-  deriving Show
+  deriving (Show, Eq)
 
 -- Instruction type
 -- Contains all instructions that this parser supports
 -- along with the arguments that the instructions may take
 data Instruction = LDA Value | LDB Value | OUT
-  deriving Show
+  deriving (Show, Eq)
 
 -- Value type
 -- An integer containing the information whether the
 -- value is a memory address or an immediate value
 data Value = Address Integer | Immediate Integer | NoValue
-  deriving Show
+  deriving (Show, Eq)
+
+-- Extracts the Integer value from Value
+valueOf :: Value -> Integer
+valueOf (Address a) = a
+valueOf (Immediate i) = i
+valueOf NoValue = 0
 
 -- Instructions that take value
 -- For example: LDA 14 or LDB #13
@@ -51,12 +58,14 @@ instructions = valueInstructions ++ ["OUT"]
 -- Converts ByteString representation of an instruction
 -- into an `Instruction` type. Expects that the argument
 -- is checked to actually contain a valid instruction
-toInstruction :: B.ByteString -> Value -> Instruction
+toInstruction :: B.ByteString -> Value -> Maybe Instruction
 toInstruction inst value =
     case inst of
-      "LDA" -> LDA value
-      "LDB" -> LDB value
-      "OUT" -> OUT
+      "LDA" -> Just $ LDA value
+      "LDB" -> Just $ LDB value
+      "OUT" -> case value of
+                 NoValue -> Just OUT
+                 _ -> Nothing
 
 -- Parser accepting a whitespace or a comment
 spaceOrComment :: Parser ()
@@ -84,10 +93,25 @@ address = fmap Address number
 immediate :: Parser Value
 immediate = symbol "$" >> fmap Immediate number
 
--- Parses an value
+-- Parses an 8 bit value
 -- If no value parser matches, returns NoValue
-value :: Parser Value
-value = address <|> immediate <|> pure NoValue
+-- If the value is outside the range 0-255, fails the parser
+value8bit :: Parser Value
+value8bit = do
+  val <- address <|> immediate <|> pure NoValue
+  if (valueOf val) > 255
+    then fail $ "The argument size must be one byte (0-255)"
+    else return val
+
+-- Parses an 16 bit value
+-- If no value parser matches, returns NoValue
+-- If the value is outside the range 0-255, fails the parser
+value16bit :: Parser Value
+value16bit = do
+  val <- address <|> immediate <|> pure NoValue
+  if (valueOf val) > 65535
+    then fail $ "The argument size must be two bytes (0-65535)"
+    else return val
 
 -- Parses a number in one of following formats:
 -- unsigned integer (123)
@@ -125,13 +149,17 @@ instruction' = lexeme (many alphaNumChar >>= check)
 -- Parses an instruction from the input, along with
 -- the possible value argument for the instruction
 instruction :: Parser Instruction
-instruction = toInstruction <$> instruction' <*> value
+instruction = do
+  ins <- toInstruction <$> instruction' <*> value8bit
+  case ins of
+    Just ins -> return ins
+    Nothing -> fail $ "Instruction does not take any arguments"
 
 -- Parses an action that changes the current address
 -- For example:
 -- * = #100
 execAddress :: Parser Action
-execAddress = symbol "*" >> symbol "=" >> value >>= return . SetExecAddr
+execAddress = symbol "*" >> symbol "=" >> value16bit >>= return . SetExecAddr
 
 -- Parses a label that can be used with jumps
 -- A label is a string of alphanumeric characters ending with ':'
@@ -151,8 +179,8 @@ parser :: Parser [Action]
 parser = between spaceOrComment eof $ many action
 
 -- Compile input into actions
-compile :: B.ByteString -> Either String [Action]
-compile input =
-    case parse parser "" input of
+parse :: B.ByteString -> Either String [Action]
+parse input =
+    case Text.Megaparsec.parse parser "" input of
       Left bundle -> Left $ errorBundlePretty bundle
       Right output -> Right output

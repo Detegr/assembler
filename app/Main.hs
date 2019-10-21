@@ -25,5 +25,5 @@ main = do
   args <- getArgs
   case inputFilePath args of
     Just file ->
-      BS.readFile file >>= writeResultToDisk . compile
+      BS.readFile file >>= writeResultToDisk . parse
     Nothing -> putStrLn "usage"

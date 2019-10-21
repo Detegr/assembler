@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.32.0.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5ffab2c340cc04f067469e4a3c534cd39b8267c04068edfbe48ffad692ddbf42
+-- hash: a8c6acf9f6f2a1ae62b1c70f675ac626e99c79bb1c8ddd0cc732382eb1ec92e3
 
 name:           assembler
 version:        0.1.0.0
@@ -61,4 +61,6 @@ test-suite assembler-test
   build-depends:
       assembler
     , base >=4.7 && <5
+    , hspec
+    , hspec-expectations
   default-language: Haskell2010
