@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib
-    ( Lib.parse,
+module Parser
+    ( Parser.parse,
       Action(..),
       Instruction(..),
       Value(..)

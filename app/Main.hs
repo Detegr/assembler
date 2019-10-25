@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Parser
 
 import qualified Data.ByteString.Lazy.Char8 as BS
 import System.Environment

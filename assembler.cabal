@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a8c6acf9f6f2a1ae62b1c70f675ac626e99c79bb1c8ddd0cc732382eb1ec92e3
+-- hash: 61dc1d037cc75026f14ac1067f71beefeaad3c5120619fed59b1185b80429975
 
 name:           assembler
 version:        0.1.0.0
@@ -26,7 +26,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Parser
   other-modules:
       Paths_assembler
   hs-source-dirs:

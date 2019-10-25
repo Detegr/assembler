@@ -4,7 +4,7 @@ module Main where
 
 import Test.Hspec
 import Test.Hspec.Expectations.Contrib
-import Lib
+import Parser
 
 main = hspec $ do
   describe "Instruction parsing" $ do
