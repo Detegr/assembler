@@ -14,5 +14,5 @@ main = hspec $ do
     it "Does not allow OUT to have an argument" $ isLeft $ parse "OUT 0"
     it "Does not allow LDA to load value over 255" $ isLeft $ parse "LDA 256"
     it "Parses * = addr" $ parse "* = #10" `shouldBe` Right [SetExecAddr (Address 16)]
-    it "Parses * = addr where addr > 255" $ parse "* = #1000" `shouldBe` Right [SetExecAddr (Address 4096)]
-    it "Does not allow execution address over 65535" $ isLeft $ parse "* = 70000"
+    it "Parses * = addr where addr <= 255" $ parse "* = #FA" `shouldBe` Right [SetExecAddr (Address 250)]
+    it "Does not allow execution address over 255" $ isLeft $ parse "* = 70000"

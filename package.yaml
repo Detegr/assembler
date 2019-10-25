@@ -26,6 +26,7 @@ library:
   dependencies:
     - bytestring
     - megaparsec
+    - word8
 
 executables:
   assembler-exe:

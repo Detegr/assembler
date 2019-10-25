@@ -103,16 +103,6 @@ value8bit = do
     then fail $ "The argument size must be one byte (0-255)"
     else return val
 
--- Parses an 16 bit value
--- If no value parser matches, returns NoValue
--- If the value is outside the range 0-255, fails the parser
-value16bit :: Parser Value
-value16bit = do
-  val <- address <|> immediate <|> pure NoValue
-  if (valueOf val) > 65535
-    then fail $ "The argument size must be two bytes (0-65535)"
-    else return val
-
 -- Parses a number in one of following formats:
 -- unsigned integer (123)
 -- hexadecimal (#1A)
@@ -159,7 +149,7 @@ instruction = do
 -- For example:
 -- * = #100
 execAddress :: Parser Action
-execAddress = symbol "*" >> symbol "=" >> value16bit >>= return . SetExecAddr
+execAddress = symbol "*" >> symbol "=" >> value8bit >>= return . SetExecAddr
 
 -- Parses a label that can be used with jumps
 -- A label is a string of alphanumeric characters ending with ':'
