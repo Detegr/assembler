@@ -4,10 +4,12 @@ module Parser
     ( Parser.parse,
       Action(..),
       Instruction(..),
-      Value(..)
+      Value(..),
+      valueOf,
+      isSetExecAddr,
+      isJumpLabel,
     ) where
 
-import Debug.Trace
 import Data.ByteString.Lazy.Char8 ()
 import qualified Data.ByteString.Lazy as B
 import Data.Void
@@ -26,6 +28,10 @@ type Parser = Parsec Void B.ByteString
 data Action = Instruction Instruction | SetExecAddr Value | JumpLabel B.ByteString
   deriving (Show, Eq)
 
+instance Ord Action where
+  compare (SetExecAddr a) (SetExecAddr b) = a `compare` b
+  compare (Instruction _) _ = LT
+
 -- Instruction type
 -- Contains all instructions that this parser supports
 -- along with the arguments that the instructions may take
@@ -36,7 +42,17 @@ data Instruction = LDA Value | LDB Value | OUT
 -- An integer containing the information whether the
 -- value is a memory address or an immediate value
 data Value = Address Integer | Immediate Integer | NoValue
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
+
+isSetExecAddr :: Action -> Bool
+isSetExecAddr x = case x of
+                    SetExecAddr _ -> True
+                    _ -> False
+
+isJumpLabel :: Action -> Bool
+isJumpLabel x = case x of
+                  JumpLabel _ -> True
+                  _ -> False
 
 -- Extracts the Integer value from Value
 valueOf :: Value -> Integer

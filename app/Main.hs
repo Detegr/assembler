@@ -1,6 +1,7 @@
 module Main where
 
 import Parser
+import Codegen
 
 import qualified Data.ByteString.Lazy.Char8 as BS
 import System.Environment
@@ -18,7 +19,7 @@ writeResultToDisk :: Either String [Action] -> IO ()
 writeResultToDisk input =
   case input of
     Left error -> putStrLn error
-    Right output -> putStrLn . show $ output
+    Right input -> BS.writeFile "out" $ generate input
 
 main :: IO ()
 main = do

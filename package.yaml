@@ -26,6 +26,7 @@ library:
   dependencies:
     - bytestring
     - megaparsec
+    - split
     - word8
 
 executables:

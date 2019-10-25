@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 61dc1d037cc75026f14ac1067f71beefeaad3c5120619fed59b1185b80429975
+-- hash: 8152420450c74a684d1de9e11bae69438620627ed0c884d1e36974920551a1c6
 
 name:           assembler
 version:        0.1.0.0
@@ -26,6 +26,7 @@ source-repository head
 
 library
   exposed-modules:
+      Codegen
       Parser
   other-modules:
       Paths_assembler
@@ -35,6 +36,8 @@ library
       base >=4.7 && <5
     , bytestring
     , megaparsec
+    , split
+    , word8
   default-language: Haskell2010
 
 executable assembler-exe
