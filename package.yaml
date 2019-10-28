@@ -25,6 +25,7 @@ library:
   source-dirs: src
   dependencies:
     - bytestring
+    - hashmap
     - megaparsec
     - split
     - word8

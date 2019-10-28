@@ -7,10 +7,9 @@ module Parser
       Value(..),
       valueOf,
       isSetExecAddr,
-      isJumpLabel,
     ) where
 
-import Data.ByteString.Lazy.Char8 ()
+import Data.ByteString.Lazy.Char8 (pack, unpack)
 import qualified Data.ByteString.Lazy as B
 import Data.Void
 import Text.Megaparsec
@@ -35,35 +34,31 @@ instance Ord Action where
 -- Instruction type
 -- Contains all instructions that this parser supports
 -- along with the arguments that the instructions may take
-data Instruction = LDA Value | LDB Value | OUT
+data Instruction = LDA Value | LDB Value | JMP Value | OUT
   deriving (Show, Eq)
 
 -- Value type
 -- An integer containing the information whether the
 -- value is a memory address or an immediate value
-data Value = Address Integer | Immediate Integer | NoValue
+data Value = Address Integer | Immediate Integer | Jump B.ByteString | NoValue
   deriving (Show, Eq, Ord)
 
+-- Returns True for SetExecAddr, false otherwise
 isSetExecAddr :: Action -> Bool
 isSetExecAddr x = case x of
                     SetExecAddr _ -> True
                     _ -> False
 
-isJumpLabel :: Action -> Bool
-isJumpLabel x = case x of
-                  JumpLabel _ -> True
-                  _ -> False
-
 -- Extracts the Integer value from Value
 valueOf :: Value -> Integer
 valueOf (Address a) = a
 valueOf (Immediate i) = i
-valueOf NoValue = 0
+valueOf _ = 0
 
 -- Instructions that take value
 -- For example: LDA 14 or LDB #13
 valueInstructions :: [B.ByteString]
-valueInstructions = ["LDA", "LDB"]
+valueInstructions = ["LDA", "LDB", "JMP"]
 
 -- All instructions, containing also the instructions
 -- that do not take a value as an argument.
@@ -74,14 +69,25 @@ instructions = valueInstructions ++ ["OUT"]
 -- Converts ByteString representation of an instruction
 -- into an `Instruction` type. Expects that the argument
 -- is checked to actually contain a valid instruction
-toInstruction :: B.ByteString -> Value -> Maybe Instruction
+toInstruction :: B.ByteString -> Value -> Either B.ByteString Instruction
 toInstruction inst value =
+    -- TODO: There has to be a way to make this more elegant
     case inst of
-      "LDA" -> Just $ LDA value
-      "LDB" -> Just $ LDB value
+      "LDA" -> case value of
+                 Address _ -> Right $ LDA value
+                 Immediate _ -> Right $ LDA value
+                 _ -> Left errorMsg
+      "LDB" -> case value of
+                 Address _ -> Right $ LDB value
+                 Immediate _ -> Right $ LDB value
+                 _ -> Left errorMsg
+      "JMP" -> case value of
+                 Jump _ -> Right $ JMP value
+                 _ -> Left errorMsg
       "OUT" -> case value of
-                 NoValue -> Just OUT
-                 _ -> Nothing
+                 NoValue -> Right OUT
+                 _ -> Left errorMsg
+  where errorMsg = pack $ "Invalid argument type: " ++ (show value) ++ " for " ++ (show inst)
 
 -- Parser accepting a whitespace or a comment
 spaceOrComment :: Parser ()
@@ -145,10 +151,10 @@ hex = symbol "#" >> lexeme L.hexadecimal
 
 -- Parses a string containing a valid instruction
 -- Fails if the string can't be found from `instructions`
-instruction' :: Parser B.ByteString
-instruction' = lexeme (many alphaNumChar >>= check)
+instruction' :: [B.ByteString] -> Parser B.ByteString
+instruction' insts = try $ lexeme (many alphaNumChar >>= check)
   where check instr = let ins = B.pack instr in
-                      if ins `elem` instructions
+                      if ins `elem` insts
                         then return ins
                         else fail $ show ins ++ " is not a valid instruction"
 
@@ -156,10 +162,11 @@ instruction' = lexeme (many alphaNumChar >>= check)
 -- the possible value argument for the instruction
 instruction :: Parser Instruction
 instruction = do
-  ins <- toInstruction <$> instruction' <*> value8bit
+  ins <- (toInstruction <$> instruction' valueInstructions <*> (labelValue <|> value8bit)) <|>
+         (toInstruction <$> instruction' instructions <*> pure NoValue)
   case ins of
-    Just ins -> return ins
-    Nothing -> fail $ "Instruction does not take any arguments"
+    Right ins -> return ins
+    Left err -> fail . unpack $ err
 
 -- Parses an action that changes the current address
 -- For example:
@@ -167,12 +174,18 @@ instruction = do
 execAddress :: Parser Action
 execAddress = symbol "*" >> symbol "=" >> value8bit >>= return . SetExecAddr
 
+-- Parsers a value that refers to a jump label
+-- For example:
+-- LOOP
+labelValue :: Parser Value
+labelValue = try $ (fmap B.pack $ (lexeme $ some letterChar)) >>= return . Jump
+
 -- Parses a label that can be used with jumps
 -- A label is a string of alphanumeric characters ending with ':'
 -- For example:
 -- LOOP:
 jumpLabel :: Parser Action
-jumpLabel = try $ (fmap B.pack $ manyTill alphaNumChar (symbol ":")) >>= return . JumpLabel
+jumpLabel = try $ (fmap B.pack $ manyTill letterChar (symbol ":")) >>= return . JumpLabel
 
 -- Parses an action
 -- See `Action` for more details of what the parser supports

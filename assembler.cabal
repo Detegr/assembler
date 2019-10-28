@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8152420450c74a684d1de9e11bae69438620627ed0c884d1e36974920551a1c6
+-- hash: 1776bc15c630bb16409033c2783d0f36831cdf6e207896e43f274b9de01ad1ec
 
 name:           assembler
 version:        0.1.0.0
@@ -35,6 +35,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , hashmap
     , megaparsec
     , split
     , word8
