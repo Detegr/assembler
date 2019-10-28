@@ -11,7 +11,7 @@ import Control.Monad.IO.Class
 
 inputFilePath :: [String] -> Maybe FilePath
 inputFilePath args =
-  case (length args) of
+  case length args of
     0 -> Nothing
     _ -> Just $ head args
 

@@ -87,7 +87,7 @@ toInstruction inst value =
       "OUT" -> case value of
                  NoValue -> Right OUT
                  _ -> Left errorMsg
-  where errorMsg = pack $ "Invalid argument type: " ++ (show value) ++ " for " ++ (show inst)
+  where errorMsg = pack $ "Invalid argument type: " ++ show value ++ " for " ++ show inst
 
 -- Parser accepting a whitespace or a comment
 spaceOrComment :: Parser ()
@@ -121,8 +121,8 @@ immediate = symbol "$" >> fmap Immediate number
 value8bit :: Parser Value
 value8bit = do
   val <- address <|> immediate <|> pure NoValue
-  if (valueOf val) > 255
-    then fail $ "The argument size must be one byte (0-255)"
+  if valueOf val > 255
+    then fail "The argument size must be one byte (0-255)"
     else return val
 
 -- Parses a number in one of following formats:
@@ -172,20 +172,20 @@ instruction = do
 -- For example:
 -- * = #100
 execAddress :: Parser Action
-execAddress = symbol "*" >> symbol "=" >> value8bit >>= return . SetExecAddr
+execAddress = SetExecAddr <$> (symbol "*" >> symbol "=" >> value8bit)
 
 -- Parsers a value that refers to a jump label
 -- For example:
 -- LOOP
 labelValue :: Parser Value
-labelValue = try $ (fmap B.pack $ (lexeme $ some letterChar)) >>= return . Jump
+labelValue = try $ Jump <$> fmap B.pack (lexeme $ some letterChar)
 
 -- Parses a label that can be used with jumps
 -- A label is a string of alphanumeric characters ending with ':'
 -- For example:
 -- LOOP:
 jumpLabel :: Parser Action
-jumpLabel = try $ (fmap B.pack $ manyTill letterChar (symbol ":")) >>= return . JumpLabel
+jumpLabel = try $ JumpLabel <$> fmap B.pack (manyTill letterChar (symbol ":"))
 
 -- Parses an action
 -- See `Action` for more details of what the parser supports
