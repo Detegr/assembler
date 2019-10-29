@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Codegen where
 
-import Data.List (foldl', sortOn, uncons)
+import Data.List (foldl', sortOn, uncons, length)
 import Data.List.Split
-import Data.HashMap
+import Data.HashMap hiding (filter, null)
 import Data.Monoid
 import Data.Typeable (typeOf)
 import Data.Word8
@@ -47,7 +47,7 @@ associateLabelsToAddresses = go 0 empty
 --   - Convert the resulting list into machine code, replacing jump instructions with absolute jumps
 generate :: [Action] -> BS.ByteString
 generate actions = foldl' (actionToBytes labelsToAddresses) "" actionsAscending
-  where actionsByExecAddr = split (keepDelimsL . whenElt $ isSetExecAddr) actions
+  where actionsByExecAddr = filter (not . null) $ split (keepDelimsL . whenElt $ isSetExecAddr) actions
         actionsAscending = concat $ sortOn head actionsByExecAddr
         labelsToAddresses = associateLabelsToAddresses actionsAscending
         actionToBytes labels acc action =
