@@ -37,6 +37,7 @@ associateLabelsToAddresses = go 0 empty
                                     SetExecAddr addr -> go (valueOf addr) ret rest
                                     JumpLabel label -> go addr (insert label addr ret) rest
                                     Instruction inst -> go (addr + instructionSize inst) ret rest
+                                    DB _ -> go (addr + 1) ret rest
                                 Nothing -> ret
 
 -- Generates machine code from a list of actions
@@ -67,3 +68,4 @@ generate actions = foldl' (actionToBytes labelsToAddresses) "" actionsAscending
                 addrValue = fromIntegral . valueOf $ addr
                 padSize = fromIntegral $ addrValue - BS.length acc
             JumpLabel _ -> acc
+            DB val -> acc `mappend` BS.pack [fromIntegral val]

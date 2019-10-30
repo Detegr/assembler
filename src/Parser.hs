@@ -24,7 +24,7 @@ type Parser = Parsec Void B.ByteString
 -- Represents either a valid instruction to execute
 -- or an action changing the control flow of the program,
 -- for example setting the address or defining labels
-data Action = Instruction Instruction | SetExecAddr Value | JumpLabel B.ByteString
+data Action = Instruction Instruction | SetExecAddr Value | JumpLabel B.ByteString | DB Integer
   deriving (Show, Eq)
 
 instance Ord Action where
@@ -187,10 +187,13 @@ labelValue = try $ Jump <$> fmap B.pack (lexeme $ some letterChar)
 jumpLabel :: Parser Action
 jumpLabel = try $ JumpLabel <$> fmap B.pack (manyTill letterChar (symbol ":"))
 
+defineByte :: Parser Action
+defineByte = try $ DB <$> fmap valueOf (symbol "DB" >> value8bit)
+
 -- Parses an action
 -- See `Action` for more details of what the parser supports
 action :: Parser Action
-action = execAddress <|> jumpLabel <|> fmap Instruction instruction
+action = execAddress <|> jumpLabel <|> defineByte <|> fmap Instruction instruction
 
 -- Main parser
 -- Parses a list of instructions

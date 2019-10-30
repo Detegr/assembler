@@ -18,6 +18,7 @@ main = hspec $ do
     it "Parses * = addr" $ parse "* = #10" `shouldBe` Right [SetExecAddr (Address 16)]
     it "Parses * = addr where addr <= 255" $ parse "* = #FA" `shouldBe` Right [SetExecAddr (Address 250)]
     it "Does not allow execution address over 255" $ isLeft $ parse "* = 70000"
+    it "Parses byte definitions" $ parse "DB 0 DB #FF" `shouldBe` Right [DB 0, DB 255]
   describe "Codegen" $
     it "Replaces jump labels with absolute addresses" $
       generate [
