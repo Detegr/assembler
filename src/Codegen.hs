@@ -54,9 +54,12 @@ generate actions = foldl' (actionToBytes labelsToAddresses) "" actionsAscending
         actionToBytes labels acc action =
           case action of
             Instruction inst ->
-              let inst' = case inst of
+              let absoluteAddr label = Address $ labels ! label
+                  inst' = case inst of
                             -- TODO: Make a pretty error if `label` refers to a nonexisting label
-                            JMP (Jump label) -> JMP $ Address $ labels ! label
+                            LDA (Jump label) -> LDA $ absoluteAddr label
+                            LDB (Jump label) -> LDB $ absoluteAddr label
+                            JMP (Jump label) -> JMP $ absoluteAddr label
                             inst -> inst
                           in
                             acc `mappend` BS.pack (instructionToBytes inst')

@@ -19,10 +19,19 @@ main = hspec $ do
     it "Parses * = addr where addr <= 255" $ parse "* = #FA" `shouldBe` Right [SetExecAddr (Address 250)]
     it "Does not allow execution address over 255" $ isLeft $ parse "* = 70000"
     it "Parses byte definitions" $ parse "DB 0 DB #FF" `shouldBe` Right [DB 0, DB 255]
-  describe "Codegen" $
+    it "Parses LDA using label name as asgument" $ parse "LDA LABEL" `shouldBe` Right [Instruction (LDA (Jump "LABEL"))]
+  describe "Codegen" $ do
     it "Replaces jump labels with absolute addresses" $
       generate [
         SetExecAddr (Address 2),
         JumpLabel "TEST",
         Instruction $ JMP (Jump "TEST")
       ] `shouldBe` pack [0x0, 0x0, 0xFF, 0x2]
+    it "Allows labels to be used as addresses" $
+      generate [
+        SetExecAddr (Address 5),
+        JumpLabel "TEST",
+        DB 10,
+        SetExecAddr (Address 0),
+        Instruction $ LDA (Jump "TEST")
+      ] `shouldBe` pack[0x1, 0x5, 0x0, 0x0, 0x0, 0xA]
