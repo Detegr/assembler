@@ -76,12 +76,12 @@ toInstruction inst value =
       "LDA" -> case value of
                  Address _ -> Right $ LDA value
                  Immediate _ -> Right $ LDA value
-                 Jump x -> Right $ LDA value
+                 Jump _ -> Right $ LDA value
                  _ -> Left errorMsg
       "LDB" -> case value of
                  Address _ -> Right $ LDB value
                  Immediate _ -> Right $ LDB value
-                 Jump x -> Right $ LDA value
+                 Jump _ -> Right $ LDB value
                  _ -> Left errorMsg
       "JMP" -> case value of
                  Jump _ -> Right $ JMP value
