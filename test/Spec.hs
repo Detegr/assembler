@@ -20,6 +20,7 @@ main = hspec $ do
     it "Does not allow execution address over 255" $ isLeft $ parse "* = 70000"
     it "Parses byte definitions" $ parse "DB 0 DB #FF" `shouldBe` Right [DB 0, DB 255]
     it "Parses LDA using label name as asgument" $ parse "LDA LABEL" `shouldBe` Right [Instruction (LDA (Jump "LABEL"))]
+    it "Parses LDA immediate value" $ parse "LDA $#10" `shouldBe` Right [Instruction (LDA (Immediate 16))]
   describe "Codegen" $ do
     it "Replaces jump labels with absolute addresses" $
       generate [
@@ -34,4 +35,6 @@ main = hspec $ do
         DB 10,
         SetExecAddr (Address 0),
         Instruction $ LDA (Jump "TEST")
-      ] `shouldBe` pack[0x1, 0x5, 0x0, 0x0, 0x0, 0xA]
+      ] `shouldBe` pack [0x1, 0x5, 0x0, 0x0, 0x0, 0xA]
+    it "Generates code for immediate values" $
+      generate [Instruction (LDA (Immediate 16))] `shouldBe` pack [0x10, 0x10]

@@ -16,10 +16,12 @@ import qualified Data.ByteString.Lazy.Char8 as BSC
 instructionToBytes :: Instruction -> [Word8]
 instructionToBytes instruction =
   case instruction of
-    LDA x -> [0x1, fromIntegral $ valueOf x]
-    LDB x -> [0x2, fromIntegral $ valueOf x]
-    OUT   -> [0x3]
-    JMP x -> [0xFF, fromIntegral $ valueOf x]
+    LDA (Address x)   -> [0x1,  fromIntegral x]
+    LDA (Immediate x) -> [0x10, fromIntegral x]
+    LDB (Address x)   -> [0x2,  fromIntegral x]
+    LDB (Immediate x) -> [0x20, fromIntegral x]
+    OUT               -> [0x3]
+    JMP x             -> [0xFF, fromIntegral $ valueOf x]
 
 -- Returns the number of bytes a machine code representation of
 -- an instruction occupies
