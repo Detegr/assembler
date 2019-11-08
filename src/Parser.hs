@@ -34,7 +34,7 @@ instance Ord Action where
 -- Instruction type
 -- Contains all instructions that this parser supports
 -- along with the arguments that the instructions may take
-data Instruction = LDA Value | LDB Value | JMP Value | OUT
+data Instruction = LDA Value | LDB Value | JMP Value | NOP | OUT
   deriving (Show, Eq)
 
 -- Value type
@@ -64,7 +64,7 @@ valueInstructions = ["LDA", "LDB", "JMP"]
 -- that do not take a value as an argument.
 -- For example: LDA 14 or OUT
 instructions :: [B.ByteString]
-instructions = valueInstructions ++ ["OUT"]
+instructions = valueInstructions ++ ["NOP", "OUT"]
 
 -- Converts ByteString representation of an instruction
 -- into an `Instruction` type. Expects that the argument
@@ -85,6 +85,9 @@ toInstruction inst value =
                  _ -> Left errorMsg
       "JMP" -> case value of
                  Jump _ -> Right $ JMP value
+                 _ -> Left errorMsg
+      "NOP" -> case value of
+                 NoValue -> Right NOP
                  _ -> Left errorMsg
       "OUT" -> case value of
                  NoValue -> Right OUT

@@ -13,6 +13,7 @@ main = hspec $ do
     it "Parses LDA" $ parse "LDA 0" `shouldBe` Right [Instruction (LDA (Address 0))]
     it "Parses LDB" $ parse "LDB 0" `shouldBe` Right [Instruction (LDB (Address 0))]
     it "Parses OUT" $ parse "OUT" `shouldBe` Right [Instruction OUT]
+    it "Parses NOP" $ parse "NOP" `shouldBe` Right [Instruction NOP]
     it "Does not allow OUT to have an argument" $ isLeft $ parse "OUT 0"
     it "Does not allow LDA to load value over 255" $ isLeft $ parse "LDA 256"
     it "Parses * = addr" $ parse "* = #10" `shouldBe` Right [SetExecAddr (Address 16)]

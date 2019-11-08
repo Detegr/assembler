@@ -16,6 +16,7 @@ import qualified Data.ByteString.Lazy.Char8 as BSC
 instructionToBytes :: Instruction -> [Word8]
 instructionToBytes instruction =
   case instruction of
+    NOP               -> [0x0]
     LDA (Address x)   -> [0x1,  fromIntegral x]
     LDA (Immediate x) -> [0x10, fromIntegral x]
     LDB (Address x)   -> [0x2,  fromIntegral x]
