@@ -113,12 +113,12 @@ address :: Parser Value
 address = fmap Address number
 
 -- Parses an immediate value
--- It is an integer (any type) prefixed with '$'
+-- It is an integer (any type) prefixed with '#'
 -- It may contain additional prefixes that determine the
 -- type of the integer.
 -- For example: #$1a or #%101 or #10
 immediate :: Parser Value
-immediate = symbol "$" >> fmap Immediate number
+immediate = symbol "#" >> fmap Immediate number
 
 -- Parses an 8 bit value
 -- If no value parser matches, returns NoValue
@@ -149,10 +149,10 @@ binary :: Parser Integer
 binary = symbol "%" >> lexeme L.binary
 
 -- Parses a hexadecimal value
--- It is a base 16 integer prefixed with '#'
+-- It is a base 16 integer prefixed with '$'
 -- For example: #1A
 hex :: Parser Integer
-hex = symbol "#" >> lexeme L.hexadecimal
+hex = symbol "$" >> lexeme L.hexadecimal
 
 -- Parses a string containing a valid instruction
 -- Fails if the string can't be found from `instructions`

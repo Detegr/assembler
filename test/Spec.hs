@@ -16,12 +16,12 @@ main = hspec $ do
     it "Parses NOP" $ parse "NOP" `shouldBe` Right [Instruction NOP]
     it "Does not allow OUT to have an argument" $ isLeft $ parse "OUT 0"
     it "Does not allow LDA to load value over 255" $ isLeft $ parse "LDA 256"
-    it "Parses * = addr" $ parse "* = #10" `shouldBe` Right [SetExecAddr (Address 16)]
-    it "Parses * = addr where addr <= 255" $ parse "* = #FA" `shouldBe` Right [SetExecAddr (Address 250)]
+    it "Parses * = addr" $ parse "* = $10" `shouldBe` Right [SetExecAddr (Address 16)]
+    it "Parses * = addr where addr <= 255" $ parse "* = $FA" `shouldBe` Right [SetExecAddr (Address 250)]
     it "Does not allow execution address over 255" $ isLeft $ parse "* = 70000"
-    it "Parses byte definitions" $ parse "DB 0 DB #FF" `shouldBe` Right [DB 0, DB 255]
+    it "Parses byte definitions" $ parse "DB 0 DB $FF" `shouldBe` Right [DB 0, DB 255]
     it "Parses LDA using label name as asgument" $ parse "LDA LABEL" `shouldBe` Right [Instruction (LDA (Jump "LABEL"))]
-    it "Parses LDA immediate value" $ parse "LDA $#10" `shouldBe` Right [Instruction (LDA (Immediate 16))]
+    it "Parses LDA immediate value" $ parse "LDA #$10" `shouldBe` Right [Instruction (LDA (Immediate 16))]
   describe "Codegen" $ do
     it "Replaces jump labels with absolute addresses" $
       generate [
